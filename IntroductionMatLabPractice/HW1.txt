@@ -1,0 +1,66 @@
+Homework 1
+
+Submit two files part1.m and part2.m. Write your name and ID number in BOTH files
+email the files to Sepideh Khakzad <sepidehkhakzad@gmail.com>
+
+
+You must also sign this form and attach it to your emailhttps://www.concordia.ca/content/dam/ginacody/docs/Expectations-of-Originality-Feb14-2012.pdf
+
+Late submissions after the deadline WILL NOT BE CONSIDERED.
+
+You cannot use ANY function from the image processing toolbox except for imagesc and imshow.
+
+
+
+Part I: Matlab
+
+Write a script called part1.m the performs and displays the results of
+the following:
+
+1.) Make a 12x12 matrix and fill in with the numbers 1-144 column-wise
+(without the use of for loops!). I.E. the first column is 1,2,3,4...
+ the second is 13,14,15, .... and so on.
+
+2.) Do the same as question 1 now row-wise.
+
+3.) Using the matrix from question 1, create a new matrix half the
+size of the original containing the odd columns and the even rows.
+
+4.) Using the matrix from question 1 create a Boolean matrix (0,1)
+indicating the elements greater than 30.
+
+5.) Solve this system:
+
+	X + Y + Z = 9;
+	2*X + Y = 3;
+	Y + Z = 5;
+
+	This should be done in one short line using matrixes and
+	built-in operators.
+
+Part II: Image manipulations
+
+Write a script called part2.m that performs and displays the results of
+the following:
+
+For 1 through 4 use the built-in image "peppers.png" to test. To load it, simply type the following:
+i_pepper = imread('peppers.png');
+
+1.) Flip an image upside-down.
+
+2.) Take a color image and make it grayscale using equal weights of R,
+  G, and B. 
+
+3.) Swap the R and B color channels of an RGB image such that R is now B and
+vise versa.
+
+4.) Rotate a grey scale image 90 degrees counter-clockwise. (you cannot use imrotate or rot90)
+
+5.) Create a 12 by 12 by 3 "image" using the matrix from part 1
+  question 1.  Now, look at the "reshape" function in matlab using the
+  help command. Use reshape to  
+    a) convert this matrix to a 144 by 3 matrix.
+    b) convert the 144 by 3 matrix back to the original 12 by 12 by 3
+       structure.
+
+
