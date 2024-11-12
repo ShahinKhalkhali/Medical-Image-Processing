@@ -67,7 +67,7 @@ for KMeanNo = 1 : NofRadomization
             for i = 1:M
                 
                 if k == 1 % Layer 1 (t1)
-%                     old_max_X = featureImageIn(i, j, k);  % Initialize peak of X-intensity for counter
+%                     old_max_X = featureImageIn(i, j, k);  % Initialize peak of X-intensity axis for counter
 %                     % Set new max of X-plane
 %                     if new_max_X < old_max_X
 %                         new_max_X = old_max_X;
@@ -77,7 +77,7 @@ for KMeanNo = 1 : NofRadomization
                 end
 
                 if k == 2 % Layer 2 (t2)
-%                     old_max_Y = featureImageIn(i, j, k);  % Initialize peak of Y-intensity for counter
+%                     old_max_Y = featureImageIn(i, j, k);  % Initialize peak of Y-intensity axis for counter
 %                     % Set new max of Y-plane
 %                     if new_max_Y < old_max_Y
 %                         new_max_Y = old_max_Y;
@@ -87,7 +87,7 @@ for KMeanNo = 1 : NofRadomization
                 end
                 
                 if k == 3 % Layer 3 (pd)
-%                     old_max_Z = featureImageIn(i, j, k);  % Initialize peak of Z-intensity for counter
+%                     old_max_Z = featureImageIn(i, j, k);  % Initialize peak of Z-intensity axis for counter
 %                     % Set new max of Z-plane
 %                     if new_max_Z < old_max_Z
 %                         new_max_Z = old_max_Z;
@@ -105,39 +105,84 @@ for KMeanNo = 1 : NofRadomization
     
     % Intensities in newly made 3D array
     intensity_array = [intensity_t1; intensity_t2; intensity_pd];       % Each column is a pixel in space
-    clusterCentersIn
-    points = intensity_array'
-    [lenght_points_X, length_point_Y] = size(points);
+    points = intensity_array'                                          % Transposed to make all rows represent a pixel in space
+    [lenght_point_X, length_point_Y] = size(points);                   % Dimensions of pixel data set
     
+    convergence = false;
+    i = 0;
+
     
     % Compare image's intensity with clusters and store them in updating toy array
-    euclidean = zeros(lenght_points_X, length_point_Y);
-    if lenght_points_X < numberofClusters
+
+    while ~convergence && (i < KMeanNo)
     
-        for x = 1:lenght_points_X % Go along columns
-        
-            for y = 1:length_point_Y % Go along rows
-
-                current_point = points(x,y)
-                current_cluster = clusterCentersIn(x,y)
-                euclidean(x,y) = abs((current_point - current_cluster)^2)
-
-            end
-            euclidean(x,:)
-            distance_toy(x) = sqrt(sum(euclidean(x,:)))
+        for x = 1:lenght_point_X % Go along columns
             
-        end
-    
-    % Compare image's intensity with clusters and store them in updating actual array
-    else
-        
-        for x = 1:numberofClusters % Go along columns
+            % Reset arrays for next point
+            current_point = zeros(1, length_point_Y);
+            
             for y = 1:length_point_Y % Go along rows
-                distance(x,y) = sqrt((clusterCentersIn(x,y))^2 + (points(x,y))^2)
+                
+                % Store current point from points and go into findNearestCluster to test with one cluster at a time
+                current_point(y) = points(x,y);
+                
             end
+            
+            assign_cluster(x, y) = findNearestCluster(current_point, clusterCentersIn) % Test point with every cluster
+
+        end
+        
+        % calculate the new cluster centers
+        newClusterCenters = calculateClusterCenters(assign_cluster, points, numberofClusters);
+
+        % check if converged
+        if isequal(newClusterCenters, clusterCentersIn)
+            convergence = true;
+        else
+            clusterCentersIn = newClusterCenters;
         end
         
     end
-    
+    end
 end
+
+function nearbyCluster = findNearestCluster(current_point, current_cluster)
+
+    % Should test each point with 1 cluster at a time and
+    % determine which are the nearest to current cluster and 
+    % store them to calculate mean. Once the mean is obtained
+    % place the cluster onto the newly found mean location
+
+    cluster_array_height = height(current_cluster);
+    distances = zeros(1, width(current_cluster));
+    
+    for k = 1:cluster_array_height
+        
+        euclidean = (current_point - current_cluster(k,:)).^2;
+        distances(k) = sqrt(sum(euclidean));
+        
+    end
+
+    % Store nearest clusters from storage into nearbyCluster
+    [~, nearbyCluster] = min(distances);
+
+end
+
+function newCenters = calculateClusterCenters(assign_cluster, points, numberofClusters)
+    [M, N, noFeatures] = size(points);
+    newCenters = zeros(numberofClusters, noFeatures);
+    
+    for k = 1:numberofClusters
+        for f = 1:noFeatures
+            % get pixels for cluster k and feature f
+            clusterPixels = points(:,:,f);
+            clusterPixels = clusterPixels(assign_cluster == k);
+            % calculate mean for clusters
+            if ~isempty(clusterPixels)
+                newCenters(k, f) = mean(clusterPixels);
+            else
+                newCenters(k, f) = 0;
+            end
+        end
+    end
 end
