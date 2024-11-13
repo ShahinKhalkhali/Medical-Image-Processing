@@ -116,11 +116,14 @@ for KMeanNo = 1 : NofRadomization
     assign_cluster = zeros(M, N);
     convergence = false;
     i = 0;
+    final_i = 20;
     current_cluster = clusterCentersIn;
     
     % Compare image's intensity with clusters and store them in updating toy array
-
-    while ~convergence && (i < KMeanNo)
+    while ~convergence && (i < final_i)
+        
+        % Display number of iterations to show that we converge
+        fprintf('Iterating %d\n', i);
         i = i + 1;
         
         for x = 1:M % Go along columns
