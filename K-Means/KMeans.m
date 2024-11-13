@@ -113,10 +113,10 @@ for KMeanNo = 1 : NofRadomization
     
     %%%%%%%%%%%%%%%% Actual work %%%%%%%%%%%%%%%%
     
-    assign_cluster = zeros(M, N);
+    assign_cluster = zeros(M, N);   % Pre-allocate size of assigned cluster storage
     convergence = false;
     i = 0;
-    final_i = 20;
+    final_i = 20;   % Increase/decrease number of iterations to increase/decrease quality
     current_cluster = clusterCentersIn;
     
     % Compare image's intensity with clusters and store them in updating toy array
