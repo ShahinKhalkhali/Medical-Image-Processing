@@ -53,113 +53,124 @@ for KMeanNo = 1 : NofRadomization
         clusterCentersIn = rand(numberofClusters, noF); %randomize initialization
     end
     
-    % Initialize intensity array based on the newly found boundaries
-%     new_max_X = 0;
-%     new_max_Y = 0;
-%     new_max_Z = 0;
-    intensity_t1 = [];
-    intensity_t2 = [];
-    intensity_pd = [];
+    %%%%%%%%%%%%%%%% Testing array sizes %%%%%%%%%%%%%%%%
     
-    % Find 3D array's intensity boundaries
-    for k = 1:noF
-        for j = 1:N
-            for i = 1:M
-                
-                if k == 1 % Layer 1 (t1)
-%                     old_max_X = featureImageIn(i, j, k);  % Initialize peak of X-intensity axis for counter
-%                     % Set new max of X-plane
-%                     if new_max_X < old_max_X
-%                         new_max_X = old_max_X;
-%                     end
-                    % Store pixel at current location
-                    intensity_t1 = [intensity_t1, featureImageIn(i,j,k)];
-                end
-
-                if k == 2 % Layer 2 (t2)
-%                     old_max_Y = featureImageIn(i, j, k);  % Initialize peak of Y-intensity axis for counter
-%                     % Set new max of Y-plane
-%                     if new_max_Y < old_max_Y
-%                         new_max_Y = old_max_Y;
-%                     end
-                    % Store pixel at current location
-                    intensity_t2 = [intensity_t2, featureImageIn(i,j,k)];
-                end
-                
-                if k == 3 % Layer 3 (pd)
-%                     old_max_Z = featureImageIn(i, j, k);  % Initialize peak of Z-intensity axis for counter
-%                     % Set new max of Z-plane
-%                     if new_max_Z < old_max_Z
-%                         new_max_Z = old_max_Z;
-%                     end
-                    % Store pixel at current location
-                    intensity_pd = [intensity_pd, featureImageIn(i,j,k)];
-                end
-                
-            end
-        end
-    end
+%     % Initialize intensity array based on the newly found boundaries
+% %     new_max_X = 0;
+% %     new_max_Y = 0;
+% %     new_max_Z = 0;
+%     intensity_t1 = [];
+%     intensity_t2 = [];
+%     intensity_pd = [];
+%     
+%     % Find 3D array's intensity boundaries
+%     for k = 1:noF
+%         for j = 1:N
+%             for i = 1:M
+%                 
+%                 if k == 1 % Layer 1 (t1)
+% %                     old_max_X = featureImageIn(i, j, k);  % Initialize peak of X-intensity axis for counter
+% %                     % Set new max of X-plane
+% %                     if new_max_X < old_max_X
+% %                         new_max_X = old_max_X;
+% %                     end
+%                     % Store pixel at current location
+%                     intensity_t1 = [intensity_t1, featureImageIn(i,j,k)];
+%                 end
+% 
+%                 if k == 2 % Layer 2 (t2)
+% %                     old_max_Y = featureImageIn(i, j, k);  % Initialize peak of Y-intensity axis for counter
+% %                     % Set new max of Y-plane
+% %                     if new_max_Y < old_max_Y
+% %                         new_max_Y = old_max_Y;
+% %                     end
+%                     % Store pixel at current location
+%                     intensity_t2 = [intensity_t2, featureImageIn(i,j,k)];
+%                 end
+%                 
+%                 if k == 3 % Layer 3 (pd)
+% %                     old_max_Z = featureImageIn(i, j, k);  % Initialize peak of Z-intensity axis for counter
+% %                     % Set new max of Z-plane
+% %                     if new_max_Z < old_max_Z
+% %                         new_max_Z = old_max_Z;
+% %                     end
+%                     % Store pixel at current location
+%                     intensity_pd = [intensity_pd, featureImageIn(i,j,k)];
+%                 end
+%                 
+%             end
+%         end
+%     end
+%     
+%     % Checks maximum dimensions of 3D intensity array
+% %     intensities = [new_max_X; new_max_Y; new_max_Z];    % Checks max possible axis of intensity_array
+%     
+%     % Intensities in newly made 3D array
+%     intensity_array = [intensity_t1; intensity_t2; intensity_pd];       % Each column is a pixel in space
+%     points = intensity_array'                                          % Transposed to make all rows represent a pixel in space
+%     [lenght_point_X, length_point_Y] = size(points);                   % Dimensions of pixel data set
+%     
     
-    % Checks maximum dimensions of 3D intensity array
-%     intensities = [new_max_X; new_max_Y; new_max_Z];    % Checks max possible axis of intensity_array
+    %%%%%%%%%%%%%%%% Actual work %%%%%%%%%%%%%%%%
     
-    % Intensities in newly made 3D array
-    intensity_array = [intensity_t1; intensity_t2; intensity_pd];       % Each column is a pixel in space
-    points = intensity_array'                                          % Transposed to make all rows represent a pixel in space
-    [lenght_point_X, length_point_Y] = size(points);                   % Dimensions of pixel data set
-    
+    assign_cluster = zeros(M, N);
     convergence = false;
     i = 0;
-
+    current_cluster = clusterCentersIn;
     
     % Compare image's intensity with clusters and store them in updating toy array
 
     while ~convergence && (i < KMeanNo)
-    
-        for x = 1:lenght_point_X % Go along columns
+        i = i + 1;
+        
+        for x = 1:M % Go along columns
             
-            % Reset arrays for next point
-            current_point = zeros(1, length_point_Y);
-            
-            for y = 1:length_point_Y % Go along rows
-                
-                % Store current point from points and go into findNearestCluster to test with one cluster at a time
-                current_point(y) = points(x,y);
-                
+            for y = 1:N % Go along rows
+                % Set current point and compare to each cluster
+                current_point = squeeze(featureImageIn(x, y, :));
+                assign_cluster(x, y) = findNearestCluster(current_point, current_cluster);
             end
             
-            assign_cluster(x, y) = findNearestCluster(current_point, clusterCentersIn) % Test point with every cluster
 
         end
         
-        % calculate the new cluster centers
-        newClusterCenters = calculateClusterCenters(assign_cluster, points, numberofClusters);
+        % Calculate the new cluster centers
+        newClusters = calculateClusters(assign_cluster, featureImageIn, numberofClusters);
 
-        % check if converged
-        if isequal(newClusterCenters, clusterCentersIn)
+        % Check for convergence
+        if isequal(newClusters, current_cluster)
             convergence = true;
         else
-            clusterCentersIn = newClusterCenters;
-        end
-        
+            current_cluster = newClusters;
+        end    
     end
+    
+    % Calculatue current distance fit
+    distance_fit = bestDistance(assign_cluster, featureImageIn, current_cluster);
+    
+    % Update new best fit segment
+    if distance_fit < BestDfit
+        BestDfit = distance_fit;
+        segmentedImage = assign_cluster;
+    end
+    
     end
 end
 
-function nearbyCluster = findNearestCluster(current_point, current_cluster)
+function nearbyCluster = findNearestCluster(current_point, clusterCentersIn)
 
     % Should test each point with 1 cluster at a time and
     % determine which are the nearest to current cluster and 
     % store them to calculate mean. Once the mean is obtained
     % place the cluster onto the newly found mean location
 
-    cluster_array_height = height(current_cluster);
-    distances = zeros(1, width(current_cluster));
+    cluster_array_height = size(clusterCentersIn, 1);
+    distances = zeros(cluster_array_height, 1);
     
     for k = 1:cluster_array_height
         
-        euclidean = (current_point - current_cluster(k,:)).^2;
-        distances(k) = sqrt(sum(euclidean));
+        euclidean_distance = sqrt(sum((current_point' - clusterCentersIn(k,:)).^2));
+        distances(k) = euclidean_distance;
         
     end
 
@@ -168,21 +179,35 @@ function nearbyCluster = findNearestCluster(current_point, current_cluster)
 
 end
 
-function newCenters = calculateClusterCenters(assign_cluster, points, numberofClusters)
-    [M, N, noFeatures] = size(points);
-    newCenters = zeros(numberofClusters, noFeatures);
+function newCenterLoc = calculateClusters(assign_cluster, featureImageIn, numberofClusters)
+    [M, N, noF] = size(featureImageIn);
+    newCenterLoc = zeros(numberofClusters, noF);
     
-    for k = 1:numberofClusters
-        for f = 1:noFeatures
-            % get pixels for cluster k and feature f
-            clusterPixels = points(:,:,f);
-            clusterPixels = clusterPixels(assign_cluster == k);
+    for i = 1:numberofClusters
+        for j = 1:noF
+            % get pixels for cluster i and image j
+            clusterPixels = featureImageIn(:,:,j);
+            clusterPixels = clusterPixels(assign_cluster == i);
             % calculate mean for clusters
             if ~isempty(clusterPixels)
-                newCenters(k, f) = mean(clusterPixels);
+                newCenterLoc(i, j) = mean(clusterPixels);
             else
-                newCenters(k, f) = 0;
+                newCenterLoc(i, j) = 0;
             end
+        end
+    end
+end
+
+function distFit = bestDistance(assign_cluster, featureImageIn, current_cluster)
+    distFit = 0;
+    
+    for i = 1:size(featureImageIn, 1)
+        for j = 1:size(featureImageIn, 2)
+            pixelFeatures = squeeze(featureImageIn(i, j, :));  % get pixel features
+            clusterIndex = assign_cluster(i, j);  % get assigned cluster index
+            % compute squared distance to cluster center
+            d = sum((pixelFeatures' - current_cluster(clusterIndex, :)).^2);
+            distFit = distFit + d;
         end
     end
 end
