@@ -1,3 +1,7 @@
+% Name: Shahin Khalkhali
+% Student ID: 40057384
+% Wednesday, 13 November 2024
+
 % Implement k-means clustering. Do not use the built-in MATLAB function kmeans. Submit one file called KMeans.m (do not submit or modify Demo1.m).
 % segmentedImage = KMeans(InIm, numberofClusters, clusterCentersIn)
 % 
