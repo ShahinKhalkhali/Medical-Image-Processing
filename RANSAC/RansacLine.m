@@ -2,19 +2,42 @@
 % Name: Shahin Khalkhali
 % Student ID: 40057384
 
-% ---------------------------------------------------------------------
+%   lines = RansacLine(edgeImageIn, noIter, fitDistance, noPts, minD)
+%   -   lines is an n by 3 matrix parameterizing lines in the plane
+%   -   edgeImageIn is a binary edge image
+%   -   noIter is the number of iterations that you have to pick 2 points at random
+%   -   fitDistance is the maximum distance a pixel may lie from a line
+%   -   noPts is the minimum number of points that should vote for a line. Note that this is different
+%       from the implementation discussed in class where we pick the line with max votes. Here, we
+%       pick lines that have votes greater than noPts
+%   -   minD is the minimum distance between the 2 randomly selected points. This improves
+%       RANSAC’s performance because if the 2 original points are close, the line fitted can have
+%       inaccurate slope.
+
+% Hint hints for your RansacLine function: Use the matlab function "find" to get the
+% coordinates of all of the pixel locations corresponding to an edge.
+
+% Note that the number of lines can be different if you run the code again. For example, if we run
+% the same code without changing anything, we might get 6 lines.
+% To make sure your code is correct, you can test your code with other images, such as:
+% inIM = imread('circuit.tif');
+% inIM = imread('gantrycrane.png');
+
+% -------------------------------------------------------------------------------------------------------
 % > Referenced Sources
 % > W08_3Regression_Least_Squares_KMeans
 % > W08_4K_means by Hassan Rivaz
+% > find function: https://www.mathworks.com/help/releases/R2021a/matlab/ref/find.html
 % > Dealing with Outliers: RANSAC | Image Stitching : https://www.youtube.com/watch?v=EkYXjmiolBg&t=331s
 % > Feature Detection, Extraction, and Matching with RANSAC : https://www.youtube.com/watch?v=QDiheqzZv4s
-% -----------------------------------------------------------------
+% -------------------------------------------------------------------------------------------------------
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% noIter:       total number of iterations that 2 points are selected at random
-% fitDistance:  min distance of a point to a line to be considered as "on the line"
-% noPts:        min number of votes that each line should get
-% minD:         minimum allowed distance between pairs (in pixels). To improve line fitting
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% noIter:       the number of iterations that you have to pick 2 points at random
+% fitDistance:  the maximum distance a pixel may lie from a line
+% noPts:        the minimum number of points that should vote for a line
+% minD:         the minimum distance between the 2 randomly selected points
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function lines = RansacLine(edgeImageIn, noIter, fitDistance, noPts, minD)
 
@@ -49,8 +72,8 @@ for attempt_i = 1:noIter
         b = eIj(point_1) - m * eIi(point_1); % Calculate the y-intercept
 
         % Normalize the line equation coefficients
-        a_normalized = -m / b;
-        b_normalized = 1 / b;
+        a_norm = -m / b;
+        b_norm = 1 / b;
 
         % Compute the number of inliers for the line
         for current_pixel = 1:len
@@ -64,11 +87,11 @@ for attempt_i = 1:noIter
         end
     else
         % For vertical lines only
-        x_const = eIi(point_1); % X-components of the vertical line
+        x_const = eIi(point_1); % X-components
 
         % Normalize line equation coefficients
-        a_normalized = 1 / x_const;
-        b_normalized = 0; % If no y intercept
+        a_norm = 1 / x_const;
+        b_norm = 0; % If no y intercept
 
         % Count inliers for the vertical line
         for current_pixel = 1:len
@@ -80,7 +103,7 @@ for attempt_i = 1:noIter
 
     % Update lineArr if current line has sufficient inliers
     if inlierCount >= noPts
-        lineArr(attempt_i, :) = [a_normalized, b_normalized, 1];
+        lineArr(attempt_i, :) = [a_norm, b_norm, 1];
     end
 end
 
